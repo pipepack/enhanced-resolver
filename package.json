@@ -83,6 +83,7 @@
   },
   "dependencies": {
     "aigle": "^1.14.1",
-    "rxjs": "^6.6.3"
+    "rxjs": "^6.6.3",
+    "utility-types": "^3.10.0"
   }
 }
