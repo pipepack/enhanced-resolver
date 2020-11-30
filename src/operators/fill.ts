@@ -8,7 +8,7 @@ import { pipe, of, concat, from, OperatorFunction } from 'rxjs';
 import { concatMap, map } from 'rxjs/operators';
 
 // internal
-import { Request } from '../interface/resolver';
+import type { Request } from '../interface/resolver';
 
 export interface FillOptions {
   extensions: string[];
