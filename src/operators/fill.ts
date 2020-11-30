@@ -8,15 +8,17 @@ import { pipe, of, concat, from, OperatorFunction } from 'rxjs';
 import { concatMap, map } from 'rxjs/operators';
 
 // internal
-import type { Request } from '../interface/resolver';
+import type { NormalRequest } from '../interface/resolver';
 
 export interface FillOptions {
   extensions: string[];
 }
 
-export function fill(options: FillOptions): OperatorFunction<Request, Request> {
+export function fill(
+  options: FillOptions
+): OperatorFunction<NormalRequest, NormalRequest> {
   return pipe(
-    concatMap((request: Request) =>
+    concatMap((request: NormalRequest) =>
       concat(
         // without extra extension
         of(request),
@@ -30,7 +32,7 @@ export function fill(options: FillOptions): OperatorFunction<Request, Request> {
                 : `${request.referencePathName}.${extension}`,
             };
             // explicit returen type
-            const payload: Request = {
+            const payload: NormalRequest = {
               ...request,
               ...extra,
             };

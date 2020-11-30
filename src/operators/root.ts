@@ -9,7 +9,7 @@ import { concatMap, map } from 'rxjs/operators';
 import { isAbsolute } from 'path';
 
 // internal
-import { Request } from '../interface/resolver';
+import { NormalRequest } from '../interface/resolver';
 
 export interface RootOptions {
   // root candicate means absolute path
@@ -17,16 +17,18 @@ export interface RootOptions {
 }
 
 // convert absolute material into relative based on pass-in root options
-export function root(options: RootOptions): OperatorFunction<Request, Request> {
+export function root(
+  options: RootOptions
+): OperatorFunction<NormalRequest, NormalRequest> {
   return pipe(
-    concatMap((request: Request) => {
+    concatMap((request: NormalRequest) => {
       if (isAbsolute(request.referencePathName)) {
         return from(options.roots).pipe(
           map((context) => {
-            const payload: Request = {
+            const payload: NormalRequest = {
               ...request,
               context,
-              referencePathName: request.referencePathName.replace(/^\//, ''),
+              referencePathName: request.referencePathName.replace(/^\/+/, ''),
             };
 
             return payload;

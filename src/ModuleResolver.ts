@@ -6,18 +6,18 @@
 // package
 import { of } from 'rxjs';
 // internal
-import { parse } from './operators/parse';
+import { parseReferencePath } from './operators/parse';
 import { fill } from './operators/fill';
 import { probe } from './operators/probe';
-import { directoryIndex } from './operators/directory-index';
+import { useDirectoryIndex } from './operators/directory';
 import { Resolver } from './Resolver';
 import { promisify } from './utils/promisify';
 
 // types
-import type { Material, Terminal } from './interface/resolver';
+import type { Material, NormalTerminal } from './interface/resolver';
 import type { ProbeOptions } from './operators/probe';
 import type { FillOptions } from './operators/fill';
-import type { DirectoryIndexOptions } from './operators/directory-index';
+import type { DirectoryIndexOptions } from './operators/directory';
 
 //
 export type ModuleResolverOptions = DirectoryIndexOptions &
@@ -27,13 +27,13 @@ export type ModuleResolverOptions = DirectoryIndexOptions &
 export class ModuleResolver implements Resolver {
   constructor(private options: ModuleResolverOptions) {}
 
-  async resolve(material: Material): Promise<Terminal> {
-    const { fs, indexFiles, extensions } = this.options;
+  async resolve(material: Material): Promise<NormalTerminal> {
+    const { fs, indexes, extensions } = this.options;
     const pipeline$ = of(material).pipe(
-      parse(),
-      directoryIndex({
+      parseReferencePath(),
+      useDirectoryIndex({
         fs,
-        indexFiles,
+        indexes,
       }),
       fill({
         extensions,

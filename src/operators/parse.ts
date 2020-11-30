@@ -8,9 +8,18 @@ import { pipe, OperatorFunction } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { URL } from 'url';
 // internal
-import { Material, ReferencePathMeta, Request } from '../interface/resolver';
+import type {
+  Material,
+  NormalRequest,
+  ModuleRequest,
+  ReferencePathMeta,
+  ReferencePathModule,
+} from '../interface/resolver';
 
-export function parse(): OperatorFunction<Material, Request> {
+export function parseReferencePath(): OperatorFunction<
+  Material,
+  NormalRequest
+> {
   return pipe(
     map((m: Material) => {
       const { referencePath } = m;
@@ -22,7 +31,41 @@ export function parse(): OperatorFunction<Material, Request> {
         referencePathFragment: url.hash.replace(/^#/, ''),
       };
 
-      const payload: Request = { ...m, ...referencePathMeta };
+      const payload: NormalRequest = { ...m, ...referencePathMeta };
+
+      return payload;
+    })
+  );
+}
+
+/**
+ * @description - assume imported package name valid for now
+ */
+export function parseReferenceModule(): OperatorFunction<
+  NormalRequest,
+  ModuleRequest
+> {
+  const regexp = {
+    normal: /^([^/@]+)(?:\/([^@]+))?/,
+    scoped: /^(@[^/]+\/[^/@]+)(?:\/([^@]+))?/,
+  };
+
+  return pipe(
+    map((m: NormalRequest) => {
+      const { referencePathName } = m;
+      // pre-requirement receive valid package name
+      const [
+        ,
+        referenceModuleName,
+        referenceModuleSubPath,
+      ] = referencePathName.startsWith('@')
+        ? (regexp.scoped.exec(referencePathName) as RegExpExecArray)
+        : (regexp.normal.exec(referencePathName) as RegExpExecArray);
+      const extra: ReferencePathModule = {
+        referenceModuleName,
+        referenceModuleSubPath,
+      };
+      const payload: ModuleRequest = { ...m, ...extra };
 
       return payload;
     })

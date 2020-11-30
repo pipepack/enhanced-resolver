@@ -5,13 +5,17 @@
 
 // package
 import { join } from 'path';
-import { Observable, pipe } from 'rxjs';
-import { concatMap, first } from 'rxjs/operators';
+import { pipe } from 'rxjs';
+import { concatMap, filter, first, map } from 'rxjs/operators';
 import type { OperatorFunction } from 'rxjs';
 
 // internal
+import { is } from './is';
+import { Identity } from '../constant';
+
+// types
 import type { FileSystem } from '../interface/fs';
-import type { Request, Terminal } from '../interface/resolver';
+import type { NormalRequest, NormalTerminal } from '../interface/resolver';
 
 export interface ProbeOptions {
   fs: FileSystem;
@@ -20,34 +24,26 @@ export interface ProbeOptions {
 // TODO - parrallel managerment
 export function probe(
   options: ProbeOptions
-): OperatorFunction<Request, Terminal> {
+): OperatorFunction<NormalRequest, NormalTerminal> {
   return pipe(
-    concatMap(
-      (request) =>
-        new Observable<Terminal>((subscriber) => {
-          const { fs } = options;
-          const absPath = join(request.context, request.referencePathName);
+    concatMap((request) => {
+      const { fs } = options;
+      const absPath = join(request.context, request.referencePathName);
 
-          fs.stat(absPath)
-            .then((stat) => {
-              if (stat.isFile()) {
-                // any other extra properties here within the future
-                const extra = { absPath };
-                // explicit type description
-                const payload: Terminal = { ...request, ...extra };
+      // is() observable emit only once, so first operator not necessary here
+      return is({ fs, absPath }).pipe(
+        filter((identity) => identity === Identity.File),
+        map(() => {
+          // any other extra properties here within the future
+          const extra = { absPath };
+          // explicit type description
+          const payload: NormalTerminal = { ...request, ...extra };
 
-                // push expected terminal payload
-                subscriber.next(payload);
-              }
-            })
-            .catch((err) => {
-              // ignore influence on pipe, maybe better logger here
-            })
-            .finally(() => {
-              subscriber.complete();
-            });
+          return payload;
         })
-    ),
+      );
+    }),
+    // unsubscribe as early as possible, avoid unnecessary file probe here
     first()
   );
 }

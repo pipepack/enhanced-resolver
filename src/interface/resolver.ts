@@ -8,6 +8,7 @@ export interface Material {
   issuer: string;
 }
 
+// only relative or absolute path
 export interface ReferencePathMeta {
   // standard source path
   referencePathName: string;
@@ -17,9 +18,25 @@ export interface ReferencePathMeta {
   referencePathFragment: string;
 }
 
-export interface Request extends Material, ReferencePathMeta {}
+// module reference only
+export interface ReferencePathModule {
+  // package name
+  referenceModuleName: string;
+  // package subpath
+  referenceModuleSubPath: string;
+}
 
-export interface Terminal extends Request {
+export interface NormalRequest extends Material, ReferencePathMeta {}
+export interface ModuleRequest extends NormalRequest, ReferencePathModule {}
+
+export interface NormalTerminal extends NormalRequest {
   // 文件绝对路径
   absPath: string;
+}
+
+export interface ModuleTerminal extends ModuleRequest {
+  // 文件绝对路径
+  absPath: string;
+  // 配置文件
+  absPKG: string;
 }

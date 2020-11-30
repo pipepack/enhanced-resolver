@@ -2,7 +2,7 @@
 import { of } from 'rxjs';
 // internal
 import { Resolver } from './Resolver';
-import { parse } from './operators/parse';
+import { parseReferencePath } from './operators/parse';
 import { root } from './operators/root';
 import { probe } from './operators/probe';
 import { promisify } from './utils/promisify';
@@ -21,7 +21,7 @@ export class AssetResolver implements Resolver {
   async resolve(material: Material): Promise<Terminal> {
     const { roots, fs } = this.options;
     const pipeline$ = of(material).pipe(
-      parse(),
+      parseReferencePath(),
       root({ roots }),
       probe({ fs })
     );
