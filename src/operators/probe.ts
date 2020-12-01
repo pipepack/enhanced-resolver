@@ -6,12 +6,11 @@
 // package
 import { join } from 'path';
 import { pipe } from 'rxjs';
-import { concatMap, filter, first, map } from 'rxjs/operators';
+import { concatMap, first, map } from 'rxjs/operators';
 import type { OperatorFunction } from 'rxjs';
 
 // internal
-import { is } from './is';
-import { Identity } from '../constant';
+import { isFile } from './is';
 
 // types
 import type { FileSystem } from '../interface/fs';
@@ -31,16 +30,8 @@ export function probe(
       const absPath = join(request.context, request.referencePathName);
 
       // is() observable emit only once, so first operator not necessary here
-      return is({ fs, absPath }).pipe(
-        filter((identity) => identity === Identity.File),
-        map(() => {
-          // any other extra properties here within the future
-          const extra = { absPath };
-          // explicit type description
-          const payload: NormalTerminal = { ...request, ...extra };
-
-          return payload;
-        })
+      return isFile({ fs, absPath }).pipe(
+        map<unknown, NormalTerminal>(() => ({ ...request, absPath }))
       );
     }),
     // unsubscribe as early as possible, avoid unnecessary file probe here

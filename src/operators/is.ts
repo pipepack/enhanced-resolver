@@ -5,6 +5,7 @@
 
 // package
 import { Observable } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 // internal
 import { Identity } from '../constant';
@@ -12,12 +13,12 @@ import { Identity } from '../constant';
 // types
 import type { FileSystem } from '../interface/fs';
 
-export interface DirectoryProbeOptions {
+export interface ProbeOptions {
   fs: FileSystem;
   absPath: string;
 }
 
-export function is(options: DirectoryProbeOptions): Observable<Identity> {
+export function is(options: ProbeOptions): Observable<Identity> {
   const { fs, absPath } = options;
 
   return new Observable((subscriber) => {
@@ -42,4 +43,26 @@ export function is(options: DirectoryProbeOptions): Observable<Identity> {
         subscriber.complete();
       });
   });
+}
+
+/* type guard */
+function isFileIdentity(identity: Identity): identity is Identity.File {
+  return identity === Identity.File;
+}
+
+function isDirectoryIdentity(
+  identity: Identity
+): identity is Identity.Directory {
+  return identity === Identity.Directory;
+}
+
+/* better readability */
+export function isFile(options: ProbeOptions): Observable<Identity.File> {
+  return is(options).pipe(filter(isFileIdentity));
+}
+
+export function isDirectory(
+  options: ProbeOptions
+): Observable<Identity.Directory> {
+  return is(options).pipe(filter(isDirectoryIdentity));
 }

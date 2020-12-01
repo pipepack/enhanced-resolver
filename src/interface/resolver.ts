@@ -1,3 +1,6 @@
+// package
+import { Optional } from 'utility-types';
+
 /* resolver block */
 export interface Material {
   // current working directory, keep consistance with initial entry
@@ -27,16 +30,18 @@ export interface ReferencePathModule {
 }
 
 export interface NormalRequest extends Material, ReferencePathMeta {}
-export interface ModuleRequest extends NormalRequest, ReferencePathModule {}
+export interface ModuleRequest extends NormalRequest, ReferencePathModule {
+  pkg?: PKG;
+}
 
 export interface NormalTerminal extends NormalRequest {
   // 文件绝对路径
   absPath: string;
 }
 
-export interface ModuleTerminal extends ModuleRequest {
-  // 文件绝对路径
-  absPath: string;
-  // 配置文件
-  absPKG: string;
+/* package.json concerns */
+export type AvailableField = 'main' | 'module' | 'browser';
+
+export interface PKG extends Optional<Record<AvailableField, string>> {
+  [key: string]: unknown;
 }

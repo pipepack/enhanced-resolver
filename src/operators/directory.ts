@@ -5,17 +5,16 @@
 
 // package
 import { pipe, from, concat, of } from 'rxjs';
-import { concatMap, filter, first, map } from 'rxjs/operators';
+import { concatMap, filter, map } from 'rxjs/operators';
 import { join, isAbsolute } from 'path';
 import type { OperatorFunction } from 'rxjs';
 
 // internal
-import { is } from './is';
+import { isDirectory } from './is';
 
 // types
 import type { FileSystem } from '../interface/fs';
 import type { NormalRequest, ModuleRequest } from '../interface/resolver';
-import { Identity } from '../constant';
 
 export interface DirectoryIndexOptions {
   indexes: string[];
@@ -23,7 +22,7 @@ export interface DirectoryIndexOptions {
 }
 
 /**
- * expand possible index filename when probe directory, pass through when not
+ * expand possible index filename when probe directory, repush request without extra extension
  */
 export function useDirectoryIndex(
   options: DirectoryIndexOptions
@@ -35,10 +34,7 @@ export function useDirectoryIndex(
       const absPath = join(request.context, request.referencePathName);
 
       return concat(
-        is({ fs, absPath }).pipe(
-          filter((identity) => identity === Identity.Directory),
-          // improve readability only
-          first(),
+        isDirectory({ fs, absPath }).pipe(
           // any *Map operator consider valid here
           concatMap(() =>
             from(indexes).pipe(
@@ -63,16 +59,18 @@ export function useDirectoryIndex(
   );
 }
 
-export interface DirectoryModuleOptions {
+export interface PossibleDirectoryOptions {
   paths: string[];
   fs: FileSystem;
 }
 
 /**
- * change working directory into npm module directory when import npm module, pass through otherwise
+ * speard search paths, find possible directory which npm module exist
+ *
+ * leave empty when paths is empty
  */
-export function useDirectoryModule(
-  options: DirectoryModuleOptions
+export function usePossibleDirectory(
+  options: PossibleDirectoryOptions
 ): OperatorFunction<ModuleRequest, ModuleRequest> {
   const { fs, paths } = options;
 
@@ -82,10 +80,10 @@ export function useDirectoryModule(
       from(paths).pipe(
         filter((path) => isAbsolute(path)),
         concatMap((path) => {
+          // determine referenced directory
           const absPath = join(path, request.referenceModuleName);
 
-          return is({ fs, absPath }).pipe(
-            filter((identity) => identity === Identity.File),
+          return isDirectory({ fs, absPath }).pipe(
             map(() => {
               const payload: ModuleRequest = {
                 ...request,
@@ -96,9 +94,7 @@ export function useDirectoryModule(
               return payload;
             })
           );
-        }),
-        // care about first match directory
-        first()
+        })
       )
     )
   );
