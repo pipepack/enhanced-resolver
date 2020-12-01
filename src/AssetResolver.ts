@@ -10,7 +10,7 @@ import { promisify } from './utils/promisify';
 // interface
 import type { RootOptions } from './operators/root';
 import type { ProbeOptions } from './operators/probe';
-import type { Material, Terminal } from './interface/resolver';
+import type { Material, NormalTerminal } from './interface/resolver';
 
 // intersection options
 export type AssetResolverOptions = RootOptions & ProbeOptions;
@@ -18,7 +18,7 @@ export type AssetResolverOptions = RootOptions & ProbeOptions;
 export class AssetResolver implements Resolver {
   constructor(private options: AssetResolverOptions) {}
 
-  async resolve(material: Material): Promise<Terminal> {
+  async resolve(material: Material): Promise<NormalTerminal> {
     const { roots, fs } = this.options;
     const pipeline$ = of(material).pipe(
       parseReferencePath(),

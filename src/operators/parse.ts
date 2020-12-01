@@ -16,6 +16,7 @@ import type {
   ReferencePathModule,
 } from '../interface/resolver';
 
+// better solution required
 export function parseReferencePath(): OperatorFunction<
   Material,
   NormalRequest
@@ -26,7 +27,9 @@ export function parseReferencePath(): OperatorFunction<
       // just convert file path into url path to extract search and fragment
       const url = new URL(referencePath, 'https://github.com');
       const referencePathMeta: ReferencePathMeta = {
-        referencePathName: url.pathname,
+        referencePathName: referencePath
+          .replace(url.search, '')
+          .replace(url.hash, ''),
         referencePathQuery: url.search.replace(/^\?/, ''),
         referencePathFragment: url.hash.replace(/^#/, ''),
       };

@@ -4,7 +4,7 @@
  */
 
 // package
-import { Observable } from 'rxjs';
+import { Observable, EmptyError } from 'rxjs';
 
 export function promisify<T>(source$: Observable<T>): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -18,9 +18,9 @@ export function promisify<T>(source$: Observable<T>): Promise<T> {
       error(error) {
         reject(error);
       },
-      // safe operation call reject after resolve
+      // not necessary with implicit first operator
       complete() {
-        reject();
+        reject(new EmptyError());
       },
     });
   });

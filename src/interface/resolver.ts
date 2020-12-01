@@ -8,7 +8,7 @@ export interface Material {
   // original reference path, forbidden extra usage
   referencePath: string;
   // original file where reference occur, with literal filename
-  issuer: string;
+  issuer?: string;
 }
 
 // only relative or absolute path
