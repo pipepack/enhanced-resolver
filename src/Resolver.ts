@@ -1,6 +1,6 @@
 // internal
-import { Terminal } from './interface/resolver';
+import { Material, NormalTerminal } from './interface/resolver';
 
 export abstract class Resolver {
-  abstract async resolve(m: Material): Promise<Terminal>;
+  abstract async resolve(m: Material): Promise<NormalTerminal>;
 }

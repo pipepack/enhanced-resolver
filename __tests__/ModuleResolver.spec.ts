@@ -1,5 +1,5 @@
 // package
-import { relative } from 'path';
+import { relative, resolve } from 'path';
 import { promises } from 'fs';
 // internal
 import { ModuleResolver } from '../src/ModuleResolver';
@@ -25,6 +25,7 @@ describe('Module Resolver', () => {
       fs,
       indexes: [],
       paths: [],
+      fields: [],
       extensions: ['.ts', '.mjs', '.js'],
     });
     const terminal = await resolver.resolve(m);
@@ -42,14 +43,14 @@ describe('Module Resolver', () => {
       fs,
       indexes: [],
       paths: [],
-
+      fields: [],
       extensions: ['.ts', '.mjs', '.js'],
     });
     const resolver2 = new ModuleResolver({
       fs,
       indexes: [],
       paths: [],
-
+      fields: [],
       extensions: ['.mjs', '.js', '.ts'],
     });
 
@@ -73,7 +74,7 @@ describe('Module Resolver', () => {
       fs,
       extensions: ['.ts'],
       paths: [],
-
+      fields: [],
       indexes: ['index.wechat', 'index.alipay', 'index'],
     });
 
@@ -84,9 +85,9 @@ describe('Module Resolver', () => {
 
     const resolver2 = new ModuleResolver({
       fs,
-      extensions: ['.ts'],
       paths: [],
-
+      fields: [],
+      extensions: ['.ts'],
       indexes: ['index.alipay', 'index.wechat', 'index'],
     });
 
@@ -96,6 +97,41 @@ describe('Module Resolver', () => {
     expect(readable2).toEqual('__fixture__/directory/index.alipay.ts');
   });
 
+  it('should support npm module', async () => {
+    const m1: Material = {
+      context: __dirname,
+      referencePath: 'rxjs/operators',
+    };
+    const m2: Material = {
+      context: __dirname,
+      referencePath: 'rxjs',
+    };
+    const resolver1 = new ModuleResolver({
+      fs,
+      fields: ['main'],
+      extensions: ['.js'],
+      indexes: ['index'],
+      paths: [resolve(__dirname, '../node_modules')],
+    });
+    const resolver2 = new ModuleResolver({
+      fs,
+      fields: ['main'],
+      indexes: ['index'],
+      extensions: ['.js'],
+      paths: [resolve(__dirname, '../node_modules')],
+    });
+
+    const terminal1 = await resolver1.resolve(m1);
+    const readable1 = relative(__dirname, terminal1.absPath);
+
+    expect(readable1).toEqual('../node_modules/rxjs/operators/index.js');
+
+    const terminal2 = await resolver2.resolve(m2);
+    const readable2 = relative(__dirname, terminal2.absPath);
+
+    expect(readable2).toEqual('../node_modules/rxjs/index.js');
+  });
+
   it('should reject when no match', () => {
     const m: Material = {
       context: __dirname,
@@ -103,8 +139,9 @@ describe('Module Resolver', () => {
     };
     const resolver = new ModuleResolver({
       fs,
-      indexes: [],
       paths: [],
+      fields: [],
+      indexes: [],
       extensions: [],
     });
 

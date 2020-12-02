@@ -24,24 +24,30 @@ import type {
   NodeDirectoryOptions,
   DirectoryIndexOptions,
 } from './operators/directory';
+import { pickNodeFlavor, NodeFlavorOptions } from './operators/npm';
 
 //
 export type ModuleResolverOptions = DirectoryIndexOptions &
   ProbeOptions &
   ExtensionOptions &
+  NodeFlavorOptions &
   NodeDirectoryOptions;
 
 export class ModuleResolver implements Resolver {
   constructor(private options: ModuleResolverOptions) {}
 
   async resolve(material: Material): Promise<NormalTerminal> {
-    const { fs, indexes, paths, extensions } = this.options;
+    const { fs, indexes, fields, paths, extensions } = this.options;
     const pipeline$ = of(material).pipe(
       parse(),
+      // spread node module search absolute paths
       spreadNodeDirectory({
         fs,
         paths,
       }),
+      // the most important part of the stream
+      pickNodeFlavor({ fs, fields }),
+      // resolve directory
       spreadDirectoryIndex({
         fs,
         indexes,

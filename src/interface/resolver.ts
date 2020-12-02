@@ -41,9 +41,4 @@ export type NormalRequest = Material & ReferencePathNormal & ReferencePathNode;
 export interface NormalTerminal extends NormalRequest {
   // search result
   absPath: string;
-  // only node module
-  pkg?: PKG;
 }
-
-/* package.json concerns */
-export type AvailableField = 'main' | 'module' | 'browser';

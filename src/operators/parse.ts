@@ -77,7 +77,7 @@ function parseModule(name: string): ReferencePathNode {
     : (regexp.normal.exec(name) as RegExpExecArray);
   const payload: ReferencePathNode = {
     referenceModuleName,
-    referenceModuleSubpath,
+    referenceModuleSubpath: referenceModuleSubpath || '',
   };
 
   return payload;
