@@ -4,17 +4,19 @@
  */
 
 // package
-import { pipe, from, concat, of } from 'rxjs';
-import { concatMap, filter, map } from 'rxjs/operators';
+import { pipe, from, of } from 'rxjs';
+import { concatMap, defaultIfEmpty, filter, map } from 'rxjs/operators';
 import { join, isAbsolute } from 'path';
 import type { OperatorFunction } from 'rxjs';
 
 // internal
 import { isDirectory } from './is';
+import { assign } from '../utils/assign';
+import { Channel } from '../utils/constant';
 
 // types
 import type { FileSystem } from '../interface/fs';
-import type { NormalRequest, ModuleRequest } from '../interface/resolver';
+import type { NormalRequest } from '../interface/resolver';
 
 export interface DirectoryIndexOptions {
   indexes: string[];
@@ -22,9 +24,9 @@ export interface DirectoryIndexOptions {
 }
 
 /**
- * expand possible index filename when probe directory, repush request without extra extension
+ * expand possible index filename when probe directory, repush request otherwise
  */
-export function useDirectoryIndex(
+export function spreadDirectoryIndex(
   options: DirectoryIndexOptions
 ): OperatorFunction<NormalRequest, NormalRequest> {
   const { fs, indexes } = options;
@@ -33,69 +35,60 @@ export function useDirectoryIndex(
     concatMap((request: NormalRequest) => {
       const absPath = join(request.context, request.referencePathName);
 
-      return concat(
-        isDirectory({ fs, absPath }).pipe(
-          // any *Map operator consider valid here
-          concatMap(() =>
-            from(indexes).pipe(
-              map((index) => {
-                const payload: NormalRequest = {
-                  ...request,
-                  context: absPath,
-                  referencePathName: index,
-                  // truncate original params, maybe not necessary
-                  referencePathQuery: '',
-                  referencePathFragment: '',
-                };
-
-                return payload;
+      return isDirectory({ fs, absPath }).pipe(
+        // any *Map operator consider valid here
+        concatMap(() =>
+          from(indexes).pipe(
+            map((index) =>
+              assign(request, {
+                context: absPath,
+                referencePathName: index,
               })
             )
           )
         ),
-        of(request)
+        // when request not directory, or no indexes declared, just pass through
+        defaultIfEmpty(request)
       );
     })
   );
 }
 
-export interface PossibleDirectoryOptions {
+export interface NodeDirectoryOptions {
   paths: string[];
   fs: FileSystem;
 }
 
 /**
- * speard search paths, find possible directory which npm module exist
+ * only speard search paths when request channel == Node, filter joined path which not directory
  *
  * leave empty when paths is empty
  */
-export function usePossibleDirectory(
-  options: PossibleDirectoryOptions
-): OperatorFunction<ModuleRequest, ModuleRequest> {
+export function spreadNodeDirectory(
+  options: NodeDirectoryOptions
+): OperatorFunction<NormalRequest, NormalRequest> {
   const { fs, paths } = options;
 
   return pipe(
-    // use concatMap to locate directory series, limit parallel
-    concatMap((request) =>
-      from(paths).pipe(
-        filter((path) => isAbsolute(path)),
-        concatMap((path) => {
-          // determine referenced directory
-          const absPath = join(path, request.referenceModuleName);
+    // use concatMap to spread directory series, limit parallel
+    concatMap((request) => {
+      if (request.channel === Channel.Node) {
+        return from(paths).pipe(
+          filter(() => request.channel === Channel.Node),
+          filter((path) => isAbsolute(path)),
+          concatMap((path) => {
+            // determine referenced directory
+            const absPath = join(path, request.referenceModuleName);
 
-          return isDirectory({ fs, absPath }).pipe(
-            map(() => {
-              const payload: ModuleRequest = {
-                ...request,
-                // change relative working directory
-                context: absPath,
-              };
+            return isDirectory({ fs, absPath }).pipe(
+              map(() => assign(request, { context: absPath }))
+            );
+          })
+        );
+      }
 
-              return payload;
-            })
-          );
-        })
-      )
-    )
+      // just pass through when not Node request
+      return of(request);
+    })
   );
 }

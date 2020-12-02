@@ -1,5 +1,6 @@
 // package
 import { Optional } from 'utility-types';
+import { Channel } from '../utils/constant';
 
 /* resolver block */
 export interface Material {
@@ -12,7 +13,9 @@ export interface Material {
 }
 
 // only relative or absolute path
-export interface ReferencePathMeta {
+export interface ReferencePathNormal {
+  // distribute different pool
+  channel: Channel;
   // standard source path
   referencePathName: string;
   // just preserve, not affect match algorithm
@@ -22,26 +25,25 @@ export interface ReferencePathMeta {
 }
 
 // module reference only
-export interface ReferencePathModule {
+export interface ReferencePathNode {
   // package name
   referenceModuleName: string;
   // package subpath
-  referenceModuleSubPath: string;
+  referenceModuleSubpath: string;
 }
-
-export interface NormalRequest extends Material, ReferencePathMeta {}
-export interface ModuleRequest extends NormalRequest, ReferencePathModule {
-  pkg?: PKG;
-}
-
-export interface NormalTerminal extends NormalRequest {
-  // 文件绝对路径
-  absPath: string;
-}
-
-/* package.json concerns */
-export type AvailableField = 'main' | 'module' | 'browser';
 
 export interface PKG extends Optional<Record<AvailableField, string>> {
   [key: string]: unknown;
 }
+
+export type NormalRequest = Material & ReferencePathNormal & ReferencePathNode;
+
+export interface NormalTerminal extends NormalRequest {
+  // search result
+  absPath: string;
+  // only node module
+  pkg?: PKG;
+}
+
+/* package.json concerns */
+export type AvailableField = 'main' | 'module' | 'browser';

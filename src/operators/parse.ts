@@ -8,69 +8,92 @@ import { pipe, OperatorFunction } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { URL } from 'url';
 // internal
+import { Channel } from '../utils/constant';
+// type
 import type {
   Material,
   NormalRequest,
-  ModuleRequest,
-  ReferencePathMeta,
-  ReferencePathModule,
+  ReferencePathNode,
+  ReferencePathNormal,
 } from '../interface/resolver';
 
-// better solution required
-export function parseReferencePath(): OperatorFunction<
-  Material,
-  NormalRequest
-> {
-  return pipe(
-    map((m: Material) => {
-      const { referencePath } = m;
-      // just convert file path into url path to extract search and fragment
-      const url = new URL(referencePath, 'https://github.com');
-      const referencePathMeta: ReferencePathMeta = {
-        referencePathName: referencePath
-          .replace(url.search, '')
-          .replace(url.hash, ''),
-        referencePathQuery: url.search.replace(/^\?/, ''),
-        referencePathFragment: url.hash.replace(/^#/, ''),
-      };
+/**
+ * @description - only run within *Nix environment
+ */
+function parseChannel(referencePath: string): Channel {
+  const head = referencePath.charAt(0);
 
-      const payload: NormalRequest = { ...m, ...referencePathMeta };
-
-      return payload;
-    })
-  );
+  switch (head) {
+    case '.':
+      return Channel.Relative;
+    case '/':
+      return Channel.Absolute;
+    case '#':
+      return Channel.Internal;
+    // already assume import reference pass lint
+    case '@':
+      return Channel.Node;
+    // leave it to developer to parse extra scenario
+    default:
+      return /[a-z]/.test(head) ? Channel.Node : Channel.Unknown;
+  }
 }
 
 /**
- * @description - assume imported package name valid for now
+ * @description - split extra hash, query part
  */
-export function parseReferenceModule(): OperatorFunction<
-  NormalRequest,
-  ModuleRequest
-> {
+function parseIdentity(referencePath: string): ReferencePathNormal {
+  // just convert file path into url path to extract search and fragment
+  const url = new URL(referencePath, 'https://github.com');
+  const referencePathMeta = {
+    channel: parseChannel(referencePath),
+    referencePathName: referencePath
+      .replace(url.search, '')
+      .replace(url.hash, ''),
+    referencePathQuery: url.search.replace(/^\?/, ''),
+    referencePathFragment: url.hash.replace(/^#/, ''),
+  };
+
+  return referencePathMeta;
+}
+
+// just avoid unnecessary type infer
+function parseModuleStatic(): ReferencePathNode {
+  return {
+    referenceModuleName: '',
+    referenceModuleSubpath: '',
+  };
+}
+
+// parse node module name into parts
+function parseModule(name: string): ReferencePathNode {
   const regexp = {
     normal: /^([^/@]+)(?:\/([^@]+))?/,
     scoped: /^(@[^/]+\/[^/@]+)(?:\/([^@]+))?/,
   };
 
-  return pipe(
-    map((m: NormalRequest) => {
-      const { referencePathName } = m;
-      // pre-requirement receive valid package name
-      const [
-        ,
-        referenceModuleName,
-        referenceModuleSubPath,
-      ] = referencePathName.startsWith('@')
-        ? (regexp.scoped.exec(referencePathName) as RegExpExecArray)
-        : (regexp.normal.exec(referencePathName) as RegExpExecArray);
-      const extra: ReferencePathModule = {
-        referenceModuleName,
-        referenceModuleSubPath,
-      };
-      const payload: ModuleRequest = { ...m, ...extra };
+  const [, referenceModuleName, referenceModuleSubpath] = name.startsWith('@')
+    ? (regexp.scoped.exec(name) as RegExpExecArray)
+    : (regexp.normal.exec(name) as RegExpExecArray);
+  const payload: ReferencePathNode = {
+    referenceModuleName,
+    referenceModuleSubpath,
+  };
 
-      return payload;
+  return payload;
+}
+
+export function parse(): OperatorFunction<Material, NormalRequest> {
+  return pipe(
+    map((m: Material) => {
+      const { referencePath } = m;
+      const meta = parseIdentity(referencePath);
+      const node =
+        meta.channel === Channel.Node
+          ? parseModule(referencePath)
+          : parseModuleStatic();
+
+      return { ...meta, ...node, ...m };
     })
   );
 }

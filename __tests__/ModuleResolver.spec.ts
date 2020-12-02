@@ -24,6 +24,7 @@ describe('Module Resolver', () => {
     const resolver = new ModuleResolver({
       fs,
       indexes: [],
+      paths: [],
       extensions: ['.ts', '.mjs', '.js'],
     });
     const terminal = await resolver.resolve(m);
@@ -40,11 +41,15 @@ describe('Module Resolver', () => {
     const resolver1 = new ModuleResolver({
       fs,
       indexes: [],
+      paths: [],
+
       extensions: ['.ts', '.mjs', '.js'],
     });
     const resolver2 = new ModuleResolver({
       fs,
       indexes: [],
+      paths: [],
+
       extensions: ['.mjs', '.js', '.ts'],
     });
 
@@ -67,6 +72,8 @@ describe('Module Resolver', () => {
     const resolver1 = new ModuleResolver({
       fs,
       extensions: ['.ts'],
+      paths: [],
+
       indexes: ['index.wechat', 'index.alipay', 'index'],
     });
 
@@ -78,6 +85,8 @@ describe('Module Resolver', () => {
     const resolver2 = new ModuleResolver({
       fs,
       extensions: ['.ts'],
+      paths: [],
+
       indexes: ['index.alipay', 'index.wechat', 'index'],
     });
 
@@ -95,6 +104,7 @@ describe('Module Resolver', () => {
     const resolver = new ModuleResolver({
       fs,
       indexes: [],
+      paths: [],
       extensions: [],
     });
 

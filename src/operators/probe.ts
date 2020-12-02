@@ -30,9 +30,7 @@ export function probe(
       const absPath = join(request.context, request.referencePathName);
 
       // is() observable emit only once, so first operator not necessary here
-      return isFile({ fs, absPath }).pipe(
-        map<unknown, NormalTerminal>(() => ({ ...request, absPath }))
-      );
+      return isFile({ fs, absPath }).pipe(map(() => ({ ...request, absPath })));
     }),
     // unsubscribe as early as possible, avoid unnecessary file probe here
     first()

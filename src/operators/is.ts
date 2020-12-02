@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 // internal
-import { Identity } from '../constant';
+import { Identity } from '../utils/constant';
 
 // types
 import type { FileSystem } from '../interface/fs';

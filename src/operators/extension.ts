@@ -9,13 +9,14 @@ import { concatMap, map } from 'rxjs/operators';
 
 // internal
 import type { NormalRequest } from '../interface/resolver';
+import { assign } from '../utils/assign';
 
-export interface FillOptions {
+export interface ExtensionOptions {
   extensions: string[];
 }
 
-export function fill(
-  options: FillOptions
+export function spreadExtension(
+  options: ExtensionOptions
 ): OperatorFunction<NormalRequest, NormalRequest> {
   return pipe(
     concatMap((request: NormalRequest) =>
@@ -24,21 +25,14 @@ export function fill(
         of(request),
         // with extra extension
         from(options.extensions).pipe(
-          map((extension) => {
-            const extra = {
+          map((extension) =>
+            assign(request, {
               // allow missing dot
               referencePathName: extension.startsWith('.')
                 ? `${request.referencePathName}${extension}`
                 : `${request.referencePathName}.${extension}`,
-            };
-            // explicit returen type
-            const payload: NormalRequest = {
-              ...request,
-              ...extra,
-            };
-
-            return payload;
-          })
+            })
+          )
         )
       )
     )
