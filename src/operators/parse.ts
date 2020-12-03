@@ -77,7 +77,7 @@ function parseModule(name: string): ReferencePathNode {
     : (regexp.normal.exec(name) as RegExpExecArray);
   const payload: ReferencePathNode = {
     referenceModuleName,
-    referenceModuleSubpath: referenceModuleSubpath || '',
+    referenceModuleSubpath,
   };
 
   return payload;
@@ -90,7 +90,7 @@ export function parse(): OperatorFunction<Material, NormalRequest> {
       const meta = parseIdentity(referencePath);
       const node =
         meta.channel === Channel.Node
-          ? parseModule(referencePath)
+          ? parseModule(meta.referencePathName)
           : parseModuleStatic();
 
       return { ...meta, ...node, ...m };

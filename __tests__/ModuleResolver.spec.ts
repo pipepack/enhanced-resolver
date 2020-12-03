@@ -25,7 +25,8 @@ describe('Module Resolver', () => {
       fs,
       indexes: [],
       paths: [],
-      fields: [],
+      mainFields: [],
+      descriptionFiles: [],
       extensions: ['.ts', '.mjs', '.js'],
     });
     const terminal = await resolver.resolve(m);
@@ -43,14 +44,16 @@ describe('Module Resolver', () => {
       fs,
       indexes: [],
       paths: [],
-      fields: [],
+      mainFields: [],
+      descriptionFiles: [],
       extensions: ['.ts', '.mjs', '.js'],
     });
     const resolver2 = new ModuleResolver({
       fs,
       indexes: [],
       paths: [],
-      fields: [],
+      mainFields: [],
+      descriptionFiles: [],
       extensions: ['.mjs', '.js', '.ts'],
     });
 
@@ -74,7 +77,8 @@ describe('Module Resolver', () => {
       fs,
       extensions: ['.ts'],
       paths: [],
-      fields: [],
+      mainFields: [],
+      descriptionFiles: [],
       indexes: ['index.wechat', 'index.alipay', 'index'],
     });
 
@@ -86,7 +90,8 @@ describe('Module Resolver', () => {
     const resolver2 = new ModuleResolver({
       fs,
       paths: [],
-      fields: [],
+      mainFields: [],
+      descriptionFiles: [],
       extensions: ['.ts'],
       indexes: ['index.alipay', 'index.wechat', 'index'],
     });
@@ -108,14 +113,16 @@ describe('Module Resolver', () => {
     };
     const resolver1 = new ModuleResolver({
       fs,
-      fields: ['main'],
+      mainFields: ['main'],
+      descriptionFiles: ['package.json'],
       extensions: ['.js'],
       indexes: ['index'],
       paths: [resolve(__dirname, '../node_modules')],
     });
     const resolver2 = new ModuleResolver({
       fs,
-      fields: ['main'],
+      mainFields: ['main'],
+      descriptionFiles: ['package.json'],
       indexes: ['index'],
       extensions: ['.js'],
       paths: [resolve(__dirname, '../node_modules')],
@@ -140,7 +147,8 @@ describe('Module Resolver', () => {
     const resolver = new ModuleResolver({
       fs,
       paths: [],
-      fields: [],
+      mainFields: [],
+      descriptionFiles: [],
       indexes: [],
       extensions: [],
     });

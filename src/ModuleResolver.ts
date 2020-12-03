@@ -7,53 +7,50 @@
 import { of } from 'rxjs';
 // internal
 import { parse } from './operators/parse';
-import { spreadExtension } from './operators/extension';
+import { replenish } from './operators/replenish';
 import { probe } from './operators/probe';
-import {
-  spreadNodeDirectory,
-  spreadDirectoryIndex,
-} from './operators/directory';
-import { Resolver } from './Resolver';
+import { directory } from './operators/directory';
+import { npm } from './operators/npm';
 import { promisify } from './utils/promisify';
+import { Resolver } from './Resolver';
 
 // types
 import type { Material, NormalTerminal } from './interface/resolver';
-import type { ProbeOptions } from './operators/probe';
-import type { ExtensionOptions } from './operators/extension';
-import type {
-  NodeDirectoryOptions,
-  DirectoryIndexOptions,
-} from './operators/directory';
-import { pickNodeFlavor, NodeFlavorOptions } from './operators/npm';
+import type { NPMOptions } from './operators/npm';
+import type { FileSystem } from './interface/fs';
 
-//
-export type ModuleResolverOptions = DirectoryIndexOptions &
-  ProbeOptions &
-  ExtensionOptions &
-  NodeFlavorOptions &
-  NodeDirectoryOptions;
+export interface ModuleResolverOptions extends NPMOptions {
+  fs: FileSystem;
+  indexes: string[];
+  extensions: string[];
+}
 
 export class ModuleResolver implements Resolver {
   constructor(private options: ModuleResolverOptions) {}
 
   async resolve(material: Material): Promise<NormalTerminal> {
-    const { fs, indexes, fields, paths, extensions } = this.options;
+    const {
+      fs,
+      indexes,
+      extensions,
+      paths,
+      mainFields,
+      descriptionFiles,
+    } = this.options;
+
     const pipeline$ = of(material).pipe(
       parse(),
-      // spread node module search absolute paths
-      spreadNodeDirectory({
+      npm({
         fs,
         paths,
+        mainFields,
+        descriptionFiles,
       }),
-      // the most important part of the stream
-      pickNodeFlavor({ fs, fields }),
-      // resolve directory
-      spreadDirectoryIndex({
-        fs,
-        indexes,
-      }),
-      spreadExtension({ extensions }),
-      probe({ fs })
+      // resolve directory index
+      directory(fs, indexes),
+      // replenish missing extension
+      replenish(extensions),
+      probe(fs)
     );
 
     return promisify(pipeline$);

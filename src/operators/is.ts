@@ -5,7 +5,6 @@
 
 // package
 import { Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
 
 // internal
 import { Identity } from '../utils/constant';
@@ -45,24 +44,65 @@ export function is(options: ProbeOptions): Observable<Identity> {
   });
 }
 
-/* type guard */
-function isFileIdentity(identity: Identity): identity is Identity.File {
-  return identity === Identity.File;
+// export function isFileAlias<T>(options: ProbeOptions): OperatorFunction<T, T> {
+//   return pipe(
+//     concatMap((request))
+//   )
+// }
+// pass through when absPath is File
+export function isFile<T>(
+  fs: FileSystem,
+  absPath: string,
+  payload: T
+): Observable<T> {
+  return new Observable((subscriber) => {
+    fs.stat(absPath)
+      .then((stat) => {
+        if (stat.isFile()) {
+          // push directory identity
+          subscriber.next(payload);
+        }
+      })
+      .catch(() => {
+        // ignore influence on pipe, maybe better logger here
+      })
+      .finally(() => {
+        subscriber.complete();
+      });
+  });
 }
 
-function isDirectoryIdentity(
-  identity: Identity
-): identity is Identity.Directory {
-  return identity === Identity.Directory;
+export function isDirectory<T>(
+  fs: FileSystem,
+  absPath: string,
+  payload: T
+): Observable<T> {
+  return new Observable((subscriber) => {
+    fs.stat(absPath)
+      .then((stat) => {
+        if (stat.isDirectory()) {
+          // push directory identity
+          subscriber.next(payload);
+        }
+      })
+      .catch(() => {
+        // ignore influence on pipe, maybe better logger here
+      })
+      .finally(() => {
+        subscriber.complete();
+      });
+  });
 }
+
+/* type guard */
 
 /* better readability */
-export function isFile(options: ProbeOptions): Observable<Identity.File> {
-  return is(options).pipe(filter(isFileIdentity));
-}
+// export function isFile(options: ProbeOptions): Observable<Identity.File> {
+//   return is(options).pipe(filter(isFileIdentity));
+// }
 
-export function isDirectory(
-  options: ProbeOptions
-): Observable<Identity.Directory> {
-  return is(options).pipe(filter(isDirectoryIdentity));
-}
+// export function isDirectory(
+//   options: ProbeOptions
+// ): Observable<Identity.Directory> {
+//   return is(options).pipe(filter(isDirectoryIdentity));
+// }

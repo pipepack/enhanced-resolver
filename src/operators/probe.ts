@@ -6,7 +6,7 @@
 // package
 import { join } from 'path';
 import { pipe } from 'rxjs';
-import { concatMap, first, map } from 'rxjs/operators';
+import { concatMap, first } from 'rxjs/operators';
 import type { OperatorFunction } from 'rxjs';
 
 // internal
@@ -16,21 +16,15 @@ import { isFile } from './is';
 import type { FileSystem } from '../interface/fs';
 import type { NormalRequest, NormalTerminal } from '../interface/resolver';
 
-export interface ProbeOptions {
-  fs: FileSystem;
-}
-
 // TODO - parrallel managerment
 export function probe(
-  options: ProbeOptions
+  fs: FileSystem
 ): OperatorFunction<NormalRequest, NormalTerminal> {
   return pipe(
     concatMap((request) => {
-      const { fs } = options;
       const absPath = join(request.context, request.referencePathName);
 
-      // is() observable emit only once, so first operator not necessary here
-      return isFile({ fs, absPath }).pipe(map(() => ({ ...request, absPath })));
+      return isFile(fs, absPath, { ...request, absPath });
     }),
     // unsubscribe as early as possible, avoid unnecessary file probe here
     first()

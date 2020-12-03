@@ -1,5 +1,4 @@
 // package
-import { Optional } from 'utility-types';
 import { Channel } from '../utils/constant';
 
 /* resolver block */
@@ -29,14 +28,14 @@ export interface ReferencePathNode {
   // package name
   referenceModuleName: string;
   // package subpath
-  referenceModuleSubpath: string;
+  referenceModuleSubpath: string | undefined;
 }
 
-export interface PKG extends Optional<Record<AvailableField, string>> {
-  [key: string]: unknown;
-}
-
+// return type of parse operator
 export type NormalRequest = Material & ReferencePathNormal & ReferencePathNode;
+export interface NormalRequestWithDescriptionFile extends NormalRequest {
+  absDescriptionFile: string;
+}
 
 export interface NormalTerminal extends NormalRequest {
   // search result

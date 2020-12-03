@@ -8,15 +8,13 @@ import { pipe, of, concat, from, OperatorFunction } from 'rxjs';
 import { concatMap, map } from 'rxjs/operators';
 
 // internal
-import type { NormalRequest } from '../interface/resolver';
 import { assign } from '../utils/assign';
 
-export interface ExtensionOptions {
-  extensions: string[];
-}
+// type
+import type { NormalRequest } from '../interface/resolver';
 
-export function spreadExtension(
-  options: ExtensionOptions
+export function replenish(
+  extensions: string[]
 ): OperatorFunction<NormalRequest, NormalRequest> {
   return pipe(
     concatMap((request: NormalRequest) =>
@@ -24,7 +22,7 @@ export function spreadExtension(
         // without extra extension
         of(request),
         // with extra extension
-        from(options.extensions).pipe(
+        from(extensions).pipe(
           map((extension) =>
             assign(request, {
               // allow missing dot

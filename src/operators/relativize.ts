@@ -13,19 +13,15 @@ import { NormalRequest } from '../interface/resolver';
 import { Channel } from '../utils/constant';
 import { assign } from '../utils/assign';
 
-export interface RootOptions {
-  // root candicate means absolute path
-  roots: string[];
-}
-
 // convert absolute material into relative based on pass-in root options
-export function spreadRootDirectory(
-  options: RootOptions
+export function relativize(
+  // root candicate means absolute path
+  roots: string[]
 ): OperatorFunction<NormalRequest, NormalRequest> {
   return pipe(
     concatMap((request) => {
       if (request.channel === Channel.Absolute) {
-        return from(options.roots).pipe(
+        return from(roots).pipe(
           filter((context) => isAbsolute(context)),
           map((context) =>
             assign(request, {
