@@ -6,51 +6,37 @@
 // package
 import { of } from 'rxjs';
 // internal
+import { Resolver } from './Resolver';
 import { parse } from './operators/parse';
+import { directory } from './operators/directory';
 import { replenish } from './operators/replenish';
 import { probe } from './operators/probe';
-import { directory } from './operators/directory';
-import { npm } from './operators/npm';
 import { promisify } from './utils/promisify';
-import { Resolver } from './Resolver';
 
 // types
-import type { Material, NormalTerminal } from './interface/resolver';
-import type { NPMOptions } from './operators/npm';
 import type { FileSystem } from './interface/fs';
+import type { Material, NormalTerminal } from './interface/resolver';
 
-export interface ModuleResolverOptions extends NPMOptions {
+export interface RelativeResolverOptions {
   fs: FileSystem;
   // https://webpack.js.org/configuration/resolve/#resolvemainfiles
   mainFiles: string[];
   extensions: string[];
 }
 
-export class ModuleResolver implements Resolver {
-  constructor(private options: ModuleResolverOptions) {}
+export class RelativeResolver implements Resolver {
+  constructor(private options: RelativeResolverOptions) {}
 
   async resolve(material: Material): Promise<NormalTerminal> {
-    const {
-      fs,
-      mainFiles,
-      extensions,
-      modules,
-      mainFields,
-      descriptionFiles,
-    } = this.options;
+    const { fs, mainFiles, extensions } = this.options;
 
     const pipeline$ = of(material).pipe(
       parse(),
-      npm({
-        fs,
-        modules,
-        mainFields,
-        descriptionFiles,
-      }),
       // resolve directory index
       directory(fs, mainFiles),
       // replenish missing extension
       replenish(extensions),
+      // only care about file match
       probe(fs)
     );
 

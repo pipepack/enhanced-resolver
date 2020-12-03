@@ -1,12 +1,12 @@
 // package
-import { relative, resolve } from 'path';
+import { relative } from 'path';
 import { promises } from 'fs';
 // internal
-import { ModuleResolver } from '../src/ModuleResolver';
+import { RelativeResolver } from '../src/RelativeResolver';
 import { FileSystem } from '../src/interface/fs';
 import { Material } from '../src/interface/resolver';
 
-describe('Module Resolver', () => {
+describe('Relative Module Resolver', () => {
   const fs: FileSystem = {
     stat(path) {
       return promises.stat(path);
@@ -21,12 +21,9 @@ describe('Module Resolver', () => {
       context: __dirname,
       referencePath: './__fixture__/extension/assign.js',
     };
-    const resolver = new ModuleResolver({
+    const resolver = new RelativeResolver({
       fs,
       mainFiles: [],
-      modules: [],
-      mainFields: [],
-      descriptionFiles: [],
       extensions: ['.ts', '.mjs', '.js'],
     });
     const terminal = await resolver.resolve(m);
@@ -40,20 +37,14 @@ describe('Module Resolver', () => {
       context: __dirname,
       referencePath: './__fixture__/extension/assign',
     };
-    const resolver1 = new ModuleResolver({
+    const resolver1 = new RelativeResolver({
       fs,
       mainFiles: [],
-      modules: [],
-      mainFields: [],
-      descriptionFiles: [],
       extensions: ['.ts', '.mjs', '.js'],
     });
-    const resolver2 = new ModuleResolver({
+    const resolver2 = new RelativeResolver({
       fs,
       mainFiles: [],
-      modules: [],
-      mainFields: [],
-      descriptionFiles: [],
       extensions: ['.mjs', '.js', '.ts'],
     });
 
@@ -73,13 +64,10 @@ describe('Module Resolver', () => {
       context: __dirname,
       referencePath: './__fixture__/directory',
     };
-    const resolver1 = new ModuleResolver({
+    const resolver1 = new RelativeResolver({
       fs,
       extensions: ['.ts'],
       mainFiles: ['index.wechat', 'index.alipay', 'index'],
-      modules: [],
-      mainFields: [],
-      descriptionFiles: [],
     });
 
     const terminal1 = await resolver1.resolve(m);
@@ -87,11 +75,8 @@ describe('Module Resolver', () => {
 
     expect(readable1).toEqual('__fixture__/directory/index.wechat.ts');
 
-    const resolver2 = new ModuleResolver({
+    const resolver2 = new RelativeResolver({
       fs,
-      modules: [],
-      mainFields: [],
-      descriptionFiles: [],
       extensions: ['.ts'],
       mainFiles: ['index.alipay', 'index.wechat', 'index'],
     });
@@ -102,53 +87,13 @@ describe('Module Resolver', () => {
     expect(readable2).toEqual('__fixture__/directory/index.alipay.ts');
   });
 
-  it('should support npm module', async () => {
-    const m1: Material = {
-      context: __dirname,
-      referencePath: 'rxjs/operators',
-    };
-    const m2: Material = {
-      context: __dirname,
-      referencePath: 'rxjs',
-    };
-    const resolver1 = new ModuleResolver({
-      fs,
-      mainFields: ['main'],
-      descriptionFiles: ['package.json'],
-      extensions: ['.js'],
-      mainFiles: ['index'],
-      modules: [resolve(__dirname, '../node_modules')],
-    });
-    const resolver2 = new ModuleResolver({
-      fs,
-      mainFields: ['main'],
-      descriptionFiles: ['package.json'],
-      mainFiles: ['index'],
-      extensions: ['.js'],
-      modules: [resolve(__dirname, '../node_modules')],
-    });
-
-    const terminal1 = await resolver1.resolve(m1);
-    const readable1 = relative(__dirname, terminal1.absPath);
-
-    expect(readable1).toEqual('../node_modules/rxjs/operators/index.js');
-
-    const terminal2 = await resolver2.resolve(m2);
-    const readable2 = relative(__dirname, terminal2.absPath);
-
-    expect(readable2).toEqual('../node_modules/rxjs/index.js');
-  });
-
   it('should reject when no match', () => {
     const m: Material = {
       context: __dirname,
       referencePath: './unknown',
     };
-    const resolver = new ModuleResolver({
+    const resolver = new RelativeResolver({
       fs,
-      modules: [],
-      mainFields: [],
-      descriptionFiles: [],
       mainFiles: [],
       extensions: [],
     });
