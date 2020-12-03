@@ -21,7 +21,8 @@ import type { FileSystem } from './interface/fs';
 
 export interface ModuleResolverOptions extends NPMOptions {
   fs: FileSystem;
-  indexes: string[];
+  // https://webpack.js.org/configuration/resolve/#resolvemainfiles
+  mainFiles: string[];
   extensions: string[];
 }
 
@@ -31,9 +32,9 @@ export class ModuleResolver implements Resolver {
   async resolve(material: Material): Promise<NormalTerminal> {
     const {
       fs,
-      indexes,
+      mainFiles,
       extensions,
-      paths,
+      modules,
       mainFields,
       descriptionFiles,
     } = this.options;
@@ -42,12 +43,12 @@ export class ModuleResolver implements Resolver {
       parse(),
       npm({
         fs,
-        paths,
+        modules,
         mainFields,
         descriptionFiles,
       }),
       // resolve directory index
-      directory(fs, indexes),
+      directory(fs, mainFiles),
       // replenish missing extension
       replenish(extensions),
       probe(fs)

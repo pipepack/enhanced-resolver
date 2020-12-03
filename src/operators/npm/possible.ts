@@ -18,14 +18,13 @@ import type { NormalRequest } from '../../interface/resolver';
  */
 export function possible(
   fs: FileSystem,
-  paths: string[]
+  modules: string[]
 ): OperatorFunction<NormalRequest, NormalRequest> {
   return pipe(
     // use concatMap to spread directory series, limit parallel
     concatMap((request) => {
       if (request.channel === Channel.Node) {
-        return from(paths).pipe(
-          filter(() => request.channel === Channel.Node),
+        return from(modules).pipe(
           filter((path) => isAbsolute(path)),
           concatMap((path) => {
             // determine referenced directory

@@ -18,8 +18,8 @@ import type { FileSystem } from '../../interface/fs';
 
 export interface NPMOptions {
   fs: FileSystem;
-  // possible search directory
-  paths: string[];
+  // https://webpack.js.org/configuration/resolve/#resolvemodules
+  modules: string[];
   // https://webpack.js.org/configuration/resolve/#resolvemainfields
   mainFields: string[];
   // https://webpack.js.org/configuration/resolve/#resolvedescriptionfiles
@@ -32,14 +32,14 @@ export interface NPMOptions {
 export function npm(
   options: NPMOptions
 ): OperatorFunction<NormalRequest, NormalRequest> {
-  const { fs, mainFields, descriptionFiles, paths } = options;
+  const { fs, mainFields, descriptionFiles, modules } = options;
 
   return pipe(
     concatMap((request) => {
       if (request.channel === Channel.Node) {
         return of(request).pipe(
           // spread possible directory when necessary
-          possible(fs, paths),
+          possible(fs, modules),
           // parse package description file, assume have description file for sure
           description(fs, descriptionFiles),
           // determine final subpath

@@ -28,7 +28,7 @@ import type { NormalRequest } from '../interface/resolver';
  */
 export function directory(
   fs: FileSystem,
-  indexes: string[]
+  mainFiles: string[]
 ): OperatorFunction<NormalRequest, NormalRequest> {
   return pipe(
     concatMap((request: NormalRequest) => {
@@ -45,11 +45,11 @@ export function directory(
         isDirectory$.pipe(
           // any *Map operator consider valid here
           concatMap(() =>
-            from(indexes).pipe(
-              map((index) =>
+            from(mainFiles).pipe(
+              map((mainFile) =>
                 assign(request, {
                   context: absPath,
-                  referencePathName: index,
+                  referencePathName: mainFile,
                 })
               )
             )

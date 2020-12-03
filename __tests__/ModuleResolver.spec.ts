@@ -23,8 +23,8 @@ describe('Module Resolver', () => {
     };
     const resolver = new ModuleResolver({
       fs,
-      indexes: [],
-      paths: [],
+      mainFiles: [],
+      modules: [],
       mainFields: [],
       descriptionFiles: [],
       extensions: ['.ts', '.mjs', '.js'],
@@ -42,16 +42,16 @@ describe('Module Resolver', () => {
     };
     const resolver1 = new ModuleResolver({
       fs,
-      indexes: [],
-      paths: [],
+      mainFiles: [],
+      modules: [],
       mainFields: [],
       descriptionFiles: [],
       extensions: ['.ts', '.mjs', '.js'],
     });
     const resolver2 = new ModuleResolver({
       fs,
-      indexes: [],
-      paths: [],
+      mainFiles: [],
+      modules: [],
       mainFields: [],
       descriptionFiles: [],
       extensions: ['.mjs', '.js', '.ts'],
@@ -76,10 +76,10 @@ describe('Module Resolver', () => {
     const resolver1 = new ModuleResolver({
       fs,
       extensions: ['.ts'],
-      paths: [],
+      mainFiles: ['index.wechat', 'index.alipay', 'index'],
+      modules: [],
       mainFields: [],
       descriptionFiles: [],
-      indexes: ['index.wechat', 'index.alipay', 'index'],
     });
 
     const terminal1 = await resolver1.resolve(m);
@@ -89,11 +89,11 @@ describe('Module Resolver', () => {
 
     const resolver2 = new ModuleResolver({
       fs,
-      paths: [],
+      modules: [],
       mainFields: [],
       descriptionFiles: [],
       extensions: ['.ts'],
-      indexes: ['index.alipay', 'index.wechat', 'index'],
+      mainFiles: ['index.alipay', 'index.wechat', 'index'],
     });
 
     const terminal2 = await resolver2.resolve(m);
@@ -116,16 +116,16 @@ describe('Module Resolver', () => {
       mainFields: ['main'],
       descriptionFiles: ['package.json'],
       extensions: ['.js'],
-      indexes: ['index'],
-      paths: [resolve(__dirname, '../node_modules')],
+      mainFiles: ['index'],
+      modules: [resolve(__dirname, '../node_modules')],
     });
     const resolver2 = new ModuleResolver({
       fs,
       mainFields: ['main'],
       descriptionFiles: ['package.json'],
-      indexes: ['index'],
+      mainFiles: ['index'],
       extensions: ['.js'],
-      paths: [resolve(__dirname, '../node_modules')],
+      modules: [resolve(__dirname, '../node_modules')],
     });
 
     const terminal1 = await resolver1.resolve(m1);
@@ -146,10 +146,10 @@ describe('Module Resolver', () => {
     };
     const resolver = new ModuleResolver({
       fs,
-      paths: [],
+      modules: [],
       mainFields: [],
       descriptionFiles: [],
-      indexes: [],
+      mainFiles: [],
       extensions: [],
     });
 
