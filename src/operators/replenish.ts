@@ -4,11 +4,11 @@
  */
 
 // package
-import { pipe, of, concat, from, OperatorFunction } from 'rxjs';
-import { concatMap, map } from 'rxjs/operators';
+import { pipe, OperatorFunction } from 'rxjs';
+import { concatMap } from 'rxjs/operators';
 
 // internal
-import { assign } from '../utils/assign';
+import { replenish as _replenish } from '../observable/replenish';
 
 // type
 import type { NormalRequest } from '../interface/resolver';
@@ -17,22 +17,6 @@ export function replenish(
   extensions: string[]
 ): OperatorFunction<NormalRequest, NormalRequest> {
   return pipe(
-    concatMap((request: NormalRequest) =>
-      concat(
-        // without extra extension
-        of(request),
-        // with extra extension
-        from(extensions).pipe(
-          map((extension) =>
-            assign(request, {
-              // allow missing dot
-              referencePathName: extension.startsWith('.')
-                ? `${request.referencePathName}${extension}`
-                : `${request.referencePathName}.${extension}`,
-            })
-          )
-        )
-      )
-    )
+    concatMap((request: NormalRequest) => _replenish(request, extensions))
   );
 }

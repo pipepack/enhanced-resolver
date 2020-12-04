@@ -9,7 +9,7 @@ import { promisify } from './utils/promisify';
 
 // interface
 import type { Material, NormalTerminal } from './interface/resolver';
-import { FileSystem } from './interface/fs';
+import type { FileSystem } from './interface/fs';
 
 // intersection options
 export interface AssetResolverOptions {

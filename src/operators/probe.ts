@@ -6,7 +6,7 @@
 // package
 import { join } from 'path';
 import { pipe } from 'rxjs';
-import { concatMap, first } from 'rxjs/operators';
+import { map, first } from 'rxjs/operators';
 import type { OperatorFunction } from 'rxjs';
 
 // internal
@@ -16,17 +16,18 @@ import { isFile } from './is';
 import type { FileSystem } from '../interface/fs';
 import type { NormalRequest, NormalTerminal } from '../interface/resolver';
 
-// TODO - parrallel managerment
 export function probe(
   fs: FileSystem
 ): OperatorFunction<NormalRequest, NormalTerminal> {
   return pipe(
-    concatMap((request) => {
-      const absPath = join(request.context, request.referencePathName);
-
-      return isFile(fs, absPath, { ...request, absPath });
-    }),
+    // only care about file
+    isFile(fs),
     // unsubscribe as early as possible, avoid unnecessary file probe here
-    first()
+    first(),
+    // splice into terminal structure
+    map<NormalRequest, NormalTerminal>((request) => ({
+      ...request,
+      absPath: join(request.context, request.referencePathName),
+    }))
   );
 }

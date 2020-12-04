@@ -1,12 +1,12 @@
 // package
 import { Observable } from 'rxjs';
 // type
-import type { FileSystem } from '../../interface/fs';
+import type { FileSystem } from '../interface/fs';
 
 /**
  * use natural reject as failure of getting package.json
  */
-export function json<T extends Record<string, unknown>>(
+export function json<T>(
   fs: FileSystem,
   absDescriptionFile: string
 ): Observable<T> {

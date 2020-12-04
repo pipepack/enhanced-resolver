@@ -58,15 +58,15 @@ function parseIdentity(referencePath: string): ReferencePathNormal {
 }
 
 // just avoid unnecessary type infer
-function parseModuleStatic(): ReferencePathNode {
-  return {
-    referenceModuleName: '',
-    referenceModuleSubpath: '',
-  };
-}
+// function parseModuleStatic(): ReferencePathNode {
+//   return {
+//     referenceModuleName: '',
+//     referenceModuleSubpath: '',
+//   };
+// }
 
 // parse node module name into parts
-function parseModule(name: string): ReferencePathNode {
+export function parseModule(name: string): ReferencePathNode {
   const regexp = {
     normal: /^([^/@]+)(?:\/([^@]+))?/,
     scoped: /^(@[^/]+\/[^/@]+)(?:\/([^@]+))?/,
@@ -77,7 +77,7 @@ function parseModule(name: string): ReferencePathNode {
     : (regexp.normal.exec(name) as RegExpExecArray);
   const payload: ReferencePathNode = {
     referenceModuleName,
-    referenceModuleSubpath,
+    referenceModuleSubpath: referenceModuleSubpath || '',
   };
 
   return payload;
@@ -86,14 +86,9 @@ function parseModule(name: string): ReferencePathNode {
 export function parse(): OperatorFunction<Material, NormalRequest> {
   return pipe(
     map((m: Material) => {
-      const { referencePath } = m;
-      const meta = parseIdentity(referencePath);
-      const node =
-        meta.channel === Channel.Node
-          ? parseModule(meta.referencePathName)
-          : parseModuleStatic();
+      const meta = parseIdentity(m.referencePath);
 
-      return { ...meta, ...node, ...m };
+      return { ...meta, ...m };
     })
   );
 }

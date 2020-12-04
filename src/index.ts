@@ -6,16 +6,14 @@
 // resolver
 export { Resolver } from './Resolver';
 export { AssetResolver } from './AssetResolver';
-export { RelativeResolver } from './RelativeResolver';
+export { NodeResolver } from './NodeResolver';
 
 // built-in operator
-export { directory } from './operators/directory';
 export { parse } from './operators/parse';
-export { probe } from './operators/probe';
+export { possible } from './operators/possible';
 export { relativize } from './operators/relativize';
 export { replenish } from './operators/replenish';
-export { isDirectory, isFile } from './operators/is';
-export { npm } from './operators/npm';
+export { probe } from './operators/probe';
 
 // built-in interface
 export * from './interface/fs';
