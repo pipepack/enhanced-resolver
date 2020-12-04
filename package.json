@@ -17,7 +17,7 @@
   },
   "files": [
     "lib",
-    "native"
+    "src"
   ],
   "repository": {
     "type": "git",

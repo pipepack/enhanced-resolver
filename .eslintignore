@@ -81,3 +81,7 @@ typings/
 # Production
 dist
 build
+
+# Other
+*.js
+*.mjs
