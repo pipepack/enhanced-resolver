@@ -1,6 +1,6 @@
 {
   "name": "@pipepack/enhanced-resolver",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "yet, reimplement enhanced-resolve with the idea 'simple is best'.",
   "main": "lib/index.js",
   "types": "types/index.d.ts",
