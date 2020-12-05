@@ -44,5 +44,6 @@ jspm_packages
 /dist
 /lib
 /native
+/types
 
 .eslintcache

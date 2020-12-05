@@ -1446,18 +1446,6 @@ aggregate-error@^3.0.0:
     clean-stack "^2.0.0"
     indent-string "^4.0.0"
 
-aigle-core@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/aigle-core/-/aigle-core-1.0.0.tgz#4066e0f9a5c60996d8377ed196a21fa17b6250ab"
-  integrity sha1-QGbg+aXGCZbYN37RlqIfoXtiUKs=
-
-aigle@^1.14.1:
-  version "1.14.1"
-  resolved "https://registry.yarnpkg.com/aigle/-/aigle-1.14.1.tgz#c6aa63a669ccee4f9d456c6b5a88a3dc19ab744f"
-  integrity sha512-bCmQ65CEebspmpbWFs6ab3S27TNyVH1b5MledX8KoiGxUhsJmPUUGpaoSijhwawNnq5Lt8jbcq7Z7gUAD0nuTw==
-  dependencies:
-    aigle-core "^1.0.0"
-
 ajv@^6.10.0, ajv@^6.9.1:
   version "6.10.0"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.10.0.tgz#90d0d54439da587cd7e843bfb7045f50bd22bdf1"

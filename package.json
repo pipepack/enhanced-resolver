@@ -3,29 +3,30 @@
   "version": "0.1.1",
   "description": "yet, reimplement enhanced-resolve with the idea 'simple is best'.",
   "main": "lib/index.js",
-  "types": "src/index.ts",
+  "types": "types/index.d.ts",
   "engines": {
     "node": ">=10.0.0"
   },
   "scripts": {
-    "prepublishOnly": "npm-run-all -s clean compile",
+    "prepublishOnly": "npm-run-all -s clean compile:code compile:types",
     "test": "jest --coverage",
     "test:cov": "jest --watch",
-    "clean": "rm -rf lib",
-    "compile": "babel src --source-maps --out-dir lib --extensions '.js,.ts'",
+    "clean": "rm -rf lib types",
+    "compile:code": "babel src --source-maps --out-dir lib --extensions '.js,.ts'",
+    "compile:types": "tsc --project tsconfig.production.json",
     "compile:watch": "babel src --source-maps --out-dir lib --extensions '.js,.ts' --watch"
   },
   "files": [
     "lib",
-    "src"
+    "types"
   ],
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/pipepack/enhanced-resolver.git"
   },
   "keywords": [
-    "nodejs",
-    "universal"
+    "pipepack",
+    "enhanced-resolver"
   ],
   "author": "huang.jian <hjj491229492@hotmail.com>",
   "contributors": [
@@ -83,7 +84,6 @@
     }
   },
   "dependencies": {
-    "aigle": "^1.14.1",
     "rxjs": "^6.6.3",
     "utility-types": "^3.10.0"
   }
