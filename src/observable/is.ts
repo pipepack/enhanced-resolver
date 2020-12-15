@@ -8,56 +8,14 @@ import { join } from 'path';
 import { Observable } from 'rxjs';
 
 // internal
+// internal
 import { Identity } from '../utils/constant';
-
 // types
 import type { FileSystem } from '../interface/fs';
 import type { NormalRequest } from '../interface/resolver';
 
-export function is(
-  request: NormalRequest,
-  fs: FileSystem,
-  identity: Identity
-): Observable<NormalRequest> {
-  return new Observable((subscriber) => {
-    // only care about normal request
-    const absPath = join(request.context, request.referencePathName);
-
-    fs.stat(absPath)
-      .then((stat) => {
-        if (identity === Identity.File && stat.isFile()) {
-          subscriber.next(request);
-        } else if (identity === Identity.Directory && stat.isDirectory()) {
-          subscriber.next(request);
-        } else {
-          // fallback, swallow request silently
-        }
-      })
-      .catch(() => {
-        // ignore influence on pipe, maybe better logger here
-      })
-      .finally(() => {
-        subscriber.complete();
-      });
-  });
-}
-
-export function isFile(
-  request: NormalRequest,
-  fs: FileSystem
-): Observable<NormalRequest> {
-  return is(request, fs, Identity.File);
-}
-
-export function isDirectory(
-  request: NormalRequest,
-  fs: FileSystem
-): Observable<NormalRequest> {
-  return is(request, fs, Identity.Directory);
-}
-
 // filter absolute path directly
-export function isAlias<T>(
+export function is<T>(
   fs: FileSystem,
   absPath: string,
   identity: Identity,
@@ -84,18 +42,38 @@ export function isAlias<T>(
   });
 }
 
-export function isAliasDirectory<T>(
+export function isFile<T>(
   fs: FileSystem,
   absPath: string,
   payload: T
 ): Observable<T> {
-  return isAlias(fs, absPath, Identity.Directory, payload);
+  return is(fs, absPath, Identity.File, payload);
 }
 
-export function isAliasFile<T>(
+export function isDirectory<T>(
   fs: FileSystem,
   absPath: string,
   payload: T
 ): Observable<T> {
-  return isAlias(fs, absPath, Identity.File, payload);
+  return is(fs, absPath, Identity.Directory, payload);
+}
+
+export function isFileRequest(
+  request: NormalRequest,
+  fs: FileSystem
+): Observable<NormalRequest> {
+  const { context, referencePathName } = request;
+  const absPath = join(context, referencePathName);
+
+  return isFile(fs, absPath, request);
+}
+
+export function isDirectoryRequest(
+  request: NormalRequest,
+  fs: FileSystem
+): Observable<NormalRequest> {
+  const { context, referencePathName } = request;
+  const absPath = join(context, referencePathName);
+
+  return isDirectory(fs, absPath, request);
 }

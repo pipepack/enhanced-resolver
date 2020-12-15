@@ -4,7 +4,7 @@ import { of, from, Observable } from 'rxjs';
 import { concatMap, map } from 'rxjs/operators';
 
 // internal
-import { isDirectory } from './is';
+import { isDirectoryRequest } from './is';
 import { pickDescriptionFile, pickMainField } from './description-file';
 import { assign } from '../utils/assign';
 
@@ -28,13 +28,15 @@ export type AsModuleOptions = Pick<
   RelativeResolverOptions,
   'fs' | 'descriptionFiles' | 'mainFields'
 >;
+
 export function asModule(
   request: NormalRequest,
   options: AsModuleOptions
 ): Observable<NormalRequest> {
   const { fs, descriptionFiles, mainFields } = options;
 
-  return pickDescriptionFile(request, fs, descriptionFiles).pipe(
+  return of(request).pipe(
+    concatMap(() => pickDescriptionFile(request, fs, descriptionFiles)),
     concatMap((descriptions) =>
       pickMainField(request, descriptions, mainFields)
     )
@@ -55,7 +57,7 @@ export function asDirectory(
 ): Observable<NormalRequest> {
   const { fs, mainFiles } = options;
 
-  return isDirectory(request, fs).pipe(
+  return isDirectoryRequest(request, fs).pipe(
     concatMap(() =>
       from(mainFiles).pipe(
         map((mainFile) =>

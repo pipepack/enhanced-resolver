@@ -1,19 +1,21 @@
+/**
+ * @description - spread node search paths, filter none exist directory
+ * @author - huang.jian <hjj491229492@hotmail.com>
+ */
+
 // package
 import { isAbsolute } from 'path';
 import { from, Observable } from 'rxjs';
 import { concatMap, filter } from 'rxjs/operators';
 
 // internal
-import { isAliasDirectory } from './is';
+import { isDirectory } from './is';
 import { assign } from '../utils/assign';
 
 // type
 import type { FileSystem } from '../interface/fs';
 import type { NormalRequest } from '../interface/resolver';
 
-/**
- * only speard search paths
- */
 export function possible(
   fs: FileSystem,
   modules: string[],
@@ -22,7 +24,7 @@ export function possible(
   return from(modules).pipe(
     filter((context) => isAbsolute(context)),
     concatMap((context) =>
-      isAliasDirectory(fs, context, assign(request, { context }))
+      isDirectory(fs, context, assign(request, { context }))
     )
   );
 }

@@ -8,14 +8,14 @@ import { OperatorFunction, pipe } from 'rxjs';
 import { concatMap } from 'rxjs/operators';
 
 // internal
-import { isFile as _isFile } from '../observable/is';
+import { isFileRequest as _isFileRequest } from '../observable/is';
 
 // types
 import type { FileSystem } from '../interface/fs';
 import type { NormalRequest } from '../interface/resolver';
 
-export function isFile(
+export function isFileRequest(
   fs: FileSystem
 ): OperatorFunction<NormalRequest, NormalRequest> {
-  return pipe(concatMap((request) => _isFile(request, fs)));
+  return pipe(concatMap((request) => _isFileRequest(request, fs)));
 }

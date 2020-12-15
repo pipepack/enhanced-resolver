@@ -1,5 +1,5 @@
 /**
- * @description - detect first exist file
+ * @description - detect file request, find first match
  * @author - huang.jian <hjj491229492@hotmail.com>
  */
 
@@ -10,7 +10,7 @@ import { map, first } from 'rxjs/operators';
 import type { OperatorFunction } from 'rxjs';
 
 // internal
-import { isFile } from './is';
+import { isFileRequest } from './is';
 
 // types
 import type { FileSystem } from '../interface/fs';
@@ -20,8 +20,8 @@ export function probe(
   fs: FileSystem
 ): OperatorFunction<NormalRequest, NormalTerminal> {
   return pipe(
-    // only care about file
-    isFile(fs),
+    // only care about file request
+    isFileRequest(fs),
     // unsubscribe as early as possible, avoid unnecessary file probe here
     first(),
     // splice into terminal structure
